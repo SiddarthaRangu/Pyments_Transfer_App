@@ -1,1 +1,13 @@
-node_modules
+# Environment files
+.env
+.env.local
+.env*.local
+
+# Node modules and build files
+node_modules/
+dist/
+build/
+
+# System files
+.DS_Store
+*.log
