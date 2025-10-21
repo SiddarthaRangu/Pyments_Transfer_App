@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import toast from "react-hot-toast";
 
 import { BottomWarning } from "../components/BottomWarning";
 import { Button } from "../components/Button";
@@ -13,11 +14,13 @@ export const Signup = () => {
     const [lastName, setLastName] = useState("");
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
-    const [error, setError] = useState("");  // State to store error messages
     const navigate = useNavigate();
 
     const handleSignup = async () => {
         try {
+            // Show a loading toast
+            const loadingToastId = toast.loading('Creating your account...');
+
             const response = await axios.post("https://pyments-transfer-app.onrender.com/api/v1/user/signup", {
                 username,
                 firstName,
@@ -25,11 +28,23 @@ export const Signup = () => {
                 password
             });
 
+            // Dismiss the loading toast
+            toast.dismiss(loadingToastId);
+
             if (response.status === 200) {
-                navigate("/signin");  // Redirect to Sign-in page after successful signup
+                // Show a success toast
+                toast.success("Account created successfully! Redirecting to sign in...");
+                
+                // Redirect after a short delay
+                setTimeout(() => {
+                    navigate("/signin");
+                }, 2000); // 2-second delay
             }
         } catch (err) {
-            setError("❌ Signup failed! Please try again.");
+            // Dismiss loading toast if it exists
+            toast.dismiss();
+            // Show an error toast
+            toast.error(err.response?.data?.message || "Signup failed! Please check your inputs.");
         }
     };
 
@@ -39,15 +54,10 @@ export const Signup = () => {
                 <div className="rounded-lg bg-white w-80 text-center p-2 h-max px-4">
                     <Heading label={"Sign up"} />
                     <SubHeading label={"Enter your information to create an account"} />
-
-                    {/* Controlled Inputs */}
                     <InputBox onChange={e => setFirstName(e.target.value)} placeholder="John" label={"First Name"} />
                     <InputBox onChange={e => setLastName(e.target.value)} placeholder="Doe" label={"Last Name"} />
-                    <InputBox onChange={e => setUsername(e.target.value)} placeholder="harkirat@gmail.com" label={"Email"} />
+                    <InputBox onChange={e => setUsername(e.target.value)} placeholder="john.doe@example.com" label={"Email"} />
                     <InputBox onChange={e => setPassword(e.target.value)} placeholder="123456" label={"Password"} type="password" />
-
-                    {/* Error Message */}
-                    {error && <p className="text-red-500 text-sm">{error}</p>}
 
                     <div className="pt-4">
                         <Button onClick={handleSignup} label={"Sign up"} />

@@ -42,7 +42,7 @@ cd client
 npm install
 
 # Start the frontend
-npm start
+npm run dev
 ```
 
 ```sh
@@ -51,7 +51,7 @@ cd server
 npm install
 
 # Start the backend
-npm run dev
+npm start
 ```
 🚀 The frontend runs on `http://localhost:5173` (or `http://localhost:3000` depending on your setup).  
 🔗 The backend runs on `http://localhost:3000/api`.

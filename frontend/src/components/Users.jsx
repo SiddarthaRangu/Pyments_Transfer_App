@@ -3,18 +3,33 @@ import { Button } from "./Button"
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
-
 export const Users = () => {
-    // Replace with backend call
     const [users, setUsers] = useState([]);
     const [filter, setFilter] = useState("");
 
     useEffect(() => {
-        axios.get("https://pyments-transfer-app.onrender.com/api/v1/user/bulk?filter=" + filter)
+        // Use a debounce function to avoid sending too many requests
+        const timerId = setTimeout(() => {
+            axios.get("https://pyments-transfer-app.onrender.com/api/v1/user/bulk?filter=" + filter, {
+                headers: {
+                    // Add the Authorization header
+                    Authorization: "Bearer " + localStorage.getItem("token")
+                }
+            })
             .then(response => {
                 setUsers(response.data.user)
             })
-    }, [filter])
+            .catch(error => {
+                // Handle potential errors, e.g., token expired
+                console.error("Failed to fetch users:", error);
+            });
+        }, 300); // Only fetches 300ms after user stops typing
+
+        // Cleanup function to clear timeout
+        return () => {
+            clearTimeout(timerId);
+        };
+    }, [filter]);
 
     return <>
         <div className="font-bold mt-6 text-lg">
@@ -23,10 +38,10 @@ export const Users = () => {
         <div className="my-2">
             <input onChange={(e) => {
                 setFilter(e.target.value)
-            }} type="text" placeholder="Search users..." className="w-full px-2 py-1 border rounded border-slate-200"></input>
+            }} type="text" placeholder="Search users..." className="w-full px-2 py-1 border rounded border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-400"></input>
         </div>
         <div>
-            {users.map(user => <User user={user} />)}
+            {users.map(user => <User key={user._id} user={user} />)}
         </div>
     </>
 }

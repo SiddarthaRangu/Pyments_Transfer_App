@@ -60,18 +60,20 @@ export const SendMoney = () => {
                             </div>
                             <button
                                 onClick={handleTransfer}
-                                className="justify-center rounded-md text-sm font-medium transition-colors h-10 px-4 py-2 w-full bg-green-500 text-white"
+                                // Updated classes for the blue theme
+                                className="justify-center rounded-md text-sm font-medium transition-colors h-10 px-4 py-2 w-full bg-blue-500 text-white hover:bg-blue-600 active:scale-95"
                             >
                                 Initiate Transfer
                             </button>
 
-                            {/* ✅ Show Transfer Status Message */}
-                            {message && <p className="text-center text-lg font-semibold">{message}</p>}
+                            {/* Show Transfer Status Message */}
+                            {message && <p className={`text-center text-lg font-semibold ${message.includes("✅") ? 'text-green-600' : 'text-red-600'}`}>{message}</p>}
 
-                            {/* ✅ Add "Back to Dashboard" Button */}
+                            {/* Add "Back to Dashboard" Button */}
                             <button
-                                onClick={() => navigate("/dashboard")}  // Navigate to Dashboard
-                                className="mt-4 justify-center rounded-md text-sm font-medium transition-colors h-10 px-4 py-2 w-full bg-gray-500 text-white"
+                                onClick={() => navigate("/dashboard")}
+                                // Updated classes for a secondary button style
+                                className="mt-4 justify-center rounded-md text-sm font-medium transition-colors h-10 px-4 py-2 w-full bg-gray-600 text-white hover:bg-gray-700 active:scale-95"
                             >
                                 ← Back to Dashboard
                             </button>
