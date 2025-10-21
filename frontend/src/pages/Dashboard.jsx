@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import { Appbar } from "../components/Appbar";
 import { Balance } from "../components/Balance";
@@ -14,30 +14,30 @@ export const Dashboard = () => {
     const [activeTab, setActiveTab] = useState('users'); 
     const [selectedUser, setSelectedUser] = useState(null);
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const token = localStorage.getItem("token");
-                const headers = { Authorization: `Bearer ${token}` };
+    const fetchData = useCallback(async () => {
+        try {
+            const token = localStorage.getItem("token");
+            const headers = { Authorization: `Bearer ${token}` };
 
-                const [balanceRes, historyRes, userRes] = await Promise.all([
-                    axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/v1/account/balance`, { headers }),
-                    axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/v1/account/history`, { headers }),
-                    axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/v1/user/me`, { headers })
-                ]);
+            const [balanceRes, historyRes, userRes] = await Promise.all([
+                axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/v1/account/balance`, { headers }),
+                axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/v1/account/history`, { headers }),
+                axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/v1/user/me`, { headers })
+            ]);
 
-                setBalance(balanceRes.data.balance);
-                setTransactions(historyRes.data.history);
-                setUser(userRes.data.user);
+            setBalance(balanceRes.data.balance);
+            setTransactions(historyRes.data.history);
+            setUser(userRes.data.user);
 
-            } catch (err) {
-                console.error("Error fetching dashboard data:", err);
-                setError("⚠️ Failed to fetch data");
-            }
-        };
-
-        fetchData();
+        } catch (err) {
+            console.error("Error fetching dashboard data:", err);
+            setError("⚠️ Failed to fetch data");
+        }
     }, []);
+
+    useEffect(() => {
+        fetchData();
+    }, [fetchData]);
 
     const handleSendMoney = (user) => {
         setSelectedUser({ id: user._id, name: user.firstName });
