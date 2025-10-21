@@ -1,7 +1,7 @@
 // backend/routes/account.js
 const express = require('express');
 const { authMiddleware } = require('../middleware');
-const { Account } = require('../db');
+const { Account,Transaction } = require('../db');
 const { default: mongoose } = require('mongoose');
 
 const router = express.Router();
@@ -44,12 +44,53 @@ router.post("/transfer", authMiddleware, async (req, res) => {
     // Perform the transfer
     await Account.updateOne({ userId: req.userId }, { $inc: { balance: -amount } }).session(session);
     await Account.updateOne({ userId: to }, { $inc: { balance: amount } }).session(session);
+    
+    // Create a transaction record
+    await Transaction.create([{
+        fromUserId: req.userId,
+        toUserId: to,
+        amount: amount
+    }], { session: session });
 
     // Commit the transaction
     await session.commitTransaction();
     res.json({
         message: "Transfer successful"
     });
+});
+
+router.get("/history", authMiddleware, async (req, res) => {
+    const userId = req.userId;
+
+    try {
+        const transactions = await Transaction.find({
+            $or: [
+                { fromUserId: userId },
+                { toUserId: userId }
+            ]
+        })
+        .sort({ timestamp: -1 }) // Show the newest transactions first
+        .populate('fromUserId', 'firstName lastName') // Get sender's name
+        .populate('toUserId', 'firstName lastName');  // Get receiver's name
+
+        // We need to know who the current user is to format the frontend correctly
+        const formattedTransactions = transactions.map(tx => ({
+            _id: tx._id,
+            amount: tx.amount,
+            timestamp: tx.timestamp,
+            // Check if the current user sent or received the money
+            type: tx.fromUserId._id.toString() === userId ? 'sent' : 'received',
+            // Get the other party's information
+            otherParty: tx.fromUserId._id.toString() === userId 
+                ? tx.toUserId 
+                : tx.fromUserId
+        }));
+
+        res.json({ history: formattedTransactions });
+
+    } catch (error) {
+        res.status(500).json({ message: "Error fetching transaction history" });
+    }
 });
 
 module.exports = router;
