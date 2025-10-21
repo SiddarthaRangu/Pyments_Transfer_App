@@ -140,17 +140,28 @@ router.get("/bulk", authMiddleware, async (req, res) => {
                 }]
             }
         ]
-    })
+    });
+
+    // return the filtered users (excluding the current user)
+    res.json({ users });
+});
+
+router.get("/me", authMiddleware, async (req, res) => {
+    const user = await User.findOne({ _id: req.userId }).select("-password"); // .select("-password") excludes the password field
+
+    if (!user) {
+        return res.status(404).json({ message: "User not found" });
+    }
 
     res.json({
-        user: users.map(user => ({
-            username: user.username,
+        user: {
             firstName: user.firstName,
             lastName: user.lastName,
+            username: user.username,
             _id: user._id
-        }))
-    })
-})
+        }
+    });
+});
 
 
 module.exports = router;

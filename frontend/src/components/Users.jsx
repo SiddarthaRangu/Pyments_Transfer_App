@@ -3,7 +3,7 @@ import { Button } from "./Button"
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
-export const Users = () => {
+export const Users = ({ onSendMoney }) => {
     const [users, setUsers] = useState([]);
     const [filter, setFilter] = useState("");
 
@@ -41,13 +41,12 @@ export const Users = () => {
             }} type="text" placeholder="Search users..." className="w-full px-2 py-1 border rounded border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-400"></input>
         </div>
         <div>
-            {users.map(user => <User key={user._id} user={user} />)}
+            {users.map(user => <User key={user._id} user={user} onSendMoney={onSendMoney} />)}
         </div>
     </>
 }
 
-function User({user}) {
-    const navigate = useNavigate();
+function User({user, onSendMoney}) {
 
     return <div className="flex justify-between">
         <div className="flex">
@@ -64,8 +63,8 @@ function User({user}) {
         </div>
 
         <div className="flex flex-col justify-center h-ful">
-            <Button onClick={(e) => {
-                navigate("/send?id=" + user._id + "&name=" + user.firstName);
+            <Button onClick={() => {
+                onSendMoney(user);
             }} label={"Send Money"} />
         </div>
     </div>
