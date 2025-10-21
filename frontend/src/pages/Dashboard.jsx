@@ -12,7 +12,7 @@ export const Dashboard = () => {
         const fetchBalance = async () => {
             try {
                 const token = localStorage.getItem("token"); // Get token from localStorage
-                const response = await axios.get("https://pyments-transfer-app.onrender.com/api/v1/account/balance", {
+                const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/v1/account/balance`, {
                     headers: {
                         Authorization: `Bearer ${token}` // Send token for authentication
                     }

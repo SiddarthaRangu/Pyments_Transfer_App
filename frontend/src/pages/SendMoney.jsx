@@ -12,7 +12,7 @@ export const SendMoney = () => {
 
     const handleTransfer = async () => {
         try {
-            const response = await axios.post("https://pyments-transfer-app.onrender.com/api/v1/account/transfer", {
+            const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/account/transfer`, {
                 to: id,
                 amount
             }, {

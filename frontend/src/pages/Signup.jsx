@@ -21,7 +21,7 @@ export const Signup = () => {
             // Show a loading toast
             const loadingToastId = toast.loading('Creating your account...');
 
-            const response = await axios.post("https://pyments-transfer-app.onrender.com/api/v1/user/signup", {
+            const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/user/signup`, {
                 username,
                 firstName,
                 lastName,
