@@ -1,0 +1,52 @@
+# A friendly name for our workflow, which will appear in the GitHub Actions tab.
+name: Lint Frontend Code
+
+# 'on' defines the trigger for this workflow. When should it run?
+on:
+  # Run it on every 'push' of code to the 'main' branch.
+  push:
+    branches: [ main ]
+  # Also run it whenever a 'pull_request' is opened or updated for the 'main' branch.
+  pull_request:
+    branches: [ main ]
+
+# 'jobs' are the tasks the workflow will perform. You can have one or more jobs.
+jobs:
+  # We'll define a single job called 'build'. You can name it anything.
+  build:
+    # A friendly name for the job.
+    name: Run ESLint
+    # 'runs-on' specifies the type of virtual machine to run the job on.
+    # 'ubuntu-latest' is a standard, cost-effective Linux machine provided by GitHub.
+    runs-on: ubuntu-latest
+
+    # 'steps' are the individual commands that make up the job. They run in order.
+    steps:
+      # Step 1: Check out your code
+      # 'uses' tells the job to use a pre-built "action".
+      # 'actions/checkout@v3' is a popular action that downloads your repository's code
+      # into the virtual machine so the next steps can access it.
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Step 2: Set up the Node.js environment
+      # 'actions/setup-node@v3' is another pre-built action.
+      # It installs Node.js onto the virtual machine.
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          # 'with' allows you to provide parameters to an action.
+          # Here, we specify which version of Node.js we want.
+          node-version: '18'
+
+      # Step 3: Install the project's dependencies
+      # 'run' lets you execute command-line commands.
+      # 'npm install' would run in the root, but our frontend is in a subfolder.
+      # '--prefix frontend' tells npm to run the command inside the 'frontend' directory.
+      - name: Install Frontend Dependencies
+        run: npm install --prefix frontend
+
+      # Step 4: Run the actual lint command
+      # This executes the 'lint' script defined in your 'frontend/package.json'.
+      - name: Run ESLint
+        run: npm run lint --prefix frontend
