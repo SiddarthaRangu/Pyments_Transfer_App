@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import { useEffect, useState } from "react";
 import { Button } from "./Button";
 import axios from "axios";
@@ -18,7 +19,7 @@ export const Users = ({ onSendMoney }) => {
             })
             .catch(error => {
                 console.error("Failed to fetch users:", error);
-                setUsers([]); // Set to empty array on error to prevent crash
+                setUsers([]);
             });
         }, 300);
 
@@ -47,6 +48,10 @@ export const Users = ({ onSendMoney }) => {
     );
 };
 
+Users.propTypes = {
+    onSendMoney: PropTypes.func.isRequired
+};
+
 function User({ user, onSendMoney }) {
     return (
         <div className="flex justify-between items-center py-2">
@@ -71,3 +76,12 @@ function User({ user, onSendMoney }) {
         </div>
     );
 }
+
+User.propTypes = {
+    user: PropTypes.shape({
+        _id: PropTypes.string.isRequired,
+        firstName: PropTypes.string.isRequired,
+        lastName: PropTypes.string.isRequired
+    }).isRequired,
+    onSendMoney: PropTypes.func.isRequired
+};

@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import { useState } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
@@ -15,11 +16,11 @@ export const SendMoneyModal = ({ user, onClose, onTransferSuccess }) => {
 
         const loadingToastId = toast.loading('Initiating transfer...');
         try {
-            await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/account/transfer`, 
+            await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/account/transfer`,
             {
                 to: user.id,
                 amount: Number(amount)
-            }, 
+            },
             {
                 headers: {
                     Authorization: "Bearer " + localStorage.getItem("token")
@@ -28,8 +29,8 @@ export const SendMoneyModal = ({ user, onClose, onTransferSuccess }) => {
             
             toast.dismiss(loadingToastId);
             toast.success("Transfer successful!");
-            onTransferSuccess(); // This will trigger a data refresh on the dashboard
-            onClose(); // Close the modal
+            onTransferSuccess();
+            onClose();
 
         } catch (error) {
             toast.dismiss(loadingToastId);
@@ -68,4 +69,13 @@ export const SendMoneyModal = ({ user, onClose, onTransferSuccess }) => {
             </div>
         </div>
     );
+};
+
+SendMoneyModal.propTypes = {
+    user: PropTypes.shape({
+        id: PropTypes.string.isRequired,
+        name: PropTypes.string.isRequired
+    }),
+    onClose: PropTypes.func.isRequired,
+    onTransferSuccess: PropTypes.func.isRequired
 };

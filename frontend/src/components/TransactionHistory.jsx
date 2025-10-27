@@ -1,4 +1,4 @@
-// frontend/src/components/TransactionHistory.jsx
+import PropTypes from 'prop-types';
 
 export const TransactionHistory = ({ transactions }) => {
     if (transactions.length === 0) {
@@ -32,4 +32,16 @@ export const TransactionHistory = ({ transactions }) => {
             </div>
         </div>
     );
+};
+
+TransactionHistory.propTypes = {
+    transactions: PropTypes.arrayOf(PropTypes.shape({
+        _id: PropTypes.string.isRequired,
+        amount: PropTypes.number.isRequired,
+        timestamp: PropTypes.string.isRequired,
+        type: PropTypes.string.isRequired,
+        otherParty: PropTypes.shape({
+            firstName: PropTypes.string.isRequired
+        }).isRequired
+    })).isRequired
 };
