@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 
 export const Balance = ({ value }) => {
     const formatCurrency = (amount) => {
@@ -18,4 +19,11 @@ export const Balance = ({ value }) => {
             </div>
         </div>
     );
+};
+
+Balance.propTypes = {
+    value: PropTypes.oneOfType([
+        PropTypes.string,
+        PropTypes.number
+    ]).isRequired
 };

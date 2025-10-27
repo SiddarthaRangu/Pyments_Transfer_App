@@ -1,3 +1,5 @@
+import PropTypes from 'prop-types';
+
 export const Appbar = ({ userName }) => {
     const userInitial = userName ? userName[0].toUpperCase() : 'U';
 
@@ -18,4 +20,8 @@ export const Appbar = ({ userName }) => {
             </div>
         </div>
     );
+};
+
+Appbar.propTypes = {
+    userName: PropTypes.string.isRequired
 };
