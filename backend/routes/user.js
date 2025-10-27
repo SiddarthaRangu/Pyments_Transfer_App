@@ -5,6 +5,7 @@ const { User, Account } = require("../db");
 const jwt = require("jsonwebtoken");
 const { JWT_SECRET } = require("../config");
 const { authMiddleware } = require("../middleware");
+const bcrypt = require('bcryptjs');
 
 const signupBody = zod.object({
     username: zod.string().email(),
@@ -30,12 +31,14 @@ router.post("/signup", async (req, res) => {
             message: "Email already taken/Incorrect inputs"
         });
     }
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(req.body.password, salt);
 
     const user = await User.create({
         username: req.body.username,
         firstName: req.body.firstName,
         lastName: req.body.lastName,
-        password: req.body.password
+        password: hashedPassword
     });
     const userId = user._id;
 
@@ -73,14 +76,18 @@ router.post("/signin", async (req, res) => {
     });
 
     if (user) {
-        const token = jwt.sign({
-            userId: user._id
-        }, JWT_SECRET);
-  
-        res.json({
-            token: token
-        });
-        return;
+        
+        const isMatch = await bcrypt.compare(req.body.password, user.password);
+         if (isMatch) {
+            const token = jwt.sign({
+                userId: user._id
+            }, JWT_SECRET);
+      
+            res.json({
+                token: token
+            });
+            return;
+        }
     }
     
     res.status(411).json({
