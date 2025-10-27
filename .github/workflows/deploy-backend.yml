@@ -6,7 +6,7 @@ on:
 
 env:
   # The AWS region to deploy to.
-  AWS_REGION: us-east-1 # Change this to your preferred region
+  AWS_REGION: ap-southeast-2 # Change this to your preferred region
   # The name of your ECR repository.
   ECR_REPOSITORY: paytm-backend
 
