@@ -65,33 +65,39 @@ const signinBody = zod.object({
 router.post("/signin", async (req, res) => {
     const { success } = signinBody.safeParse(req.body);
     if (!success) {
-        return res.status(411).json({
+        // Use 400 for bad/invalid input format
+        return res.status(400).json({
             message: "Incorrect inputs"
         });
     }
 
+    // STEP 1: Find the user by their username ONLY.
     const user = await User.findOne({
-        username: req.body.username,
-        password: req.body.password
+        username: req.body.username
     });
 
+    // STEP 2: Check if a user was found.
     if (user) {
-        
+        // STEP 3: If a user was found, NOW compare the provided password
+        // with the hashed password stored in the database.
         const isMatch = await bcrypt.compare(req.body.password, user.password);
-         if (isMatch) {
+                 if (isMatch) {
             const token = jwt.sign({
                 userId: user._id
             }, JWT_SECRET);
       
-            res.json({
+            // Send the success response
+            return res.json({
                 token: token
             });
-            return;
         }
     }
     
-    res.status(411).json({
-        message: "Error while logging in"
+    // If the user was not found OR the password comparison failed,
+    // send a generic "unauthorized" error.
+    // Use 401 for authentication failure.
+    res.status(401).json({
+        message: "Error while logging in / Invalid Credentials"
     });
 });
 
