@@ -13,7 +13,6 @@ function App() {
   return (
     <>
        <BrowserRouter>
-        {/* Toaster component here */}
         <Toaster
           position="top-center"
           reverseOrder={false}
