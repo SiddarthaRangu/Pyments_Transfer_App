@@ -1,33 +1,107 @@
-## 🚀 Payments Transfer App
+💸 SwiftPay — Full-Stack Digital Wallet
+=======================================
 
-A simple and secure money transfer application built using React, Node.js, Express, and MongoDB.
+SwiftPay is a **full-stack peer-to-peer digital wallet application** that allows users to securely manage balances and transfer money between accounts.The project focuses on **real-world product behavior**, **transaction safety**, and **polished user experience**, going beyond basic CRUD functionality.
 
-### 📌 Features
-- 🔐 User authentication (Signup & Signin)
-- 💰 View account balance
-- 🔄 Transfer money between users
-- 📋 List of users to send money
-- ✅ Secure transactions using JWT authentication
+✨ Key Features
+--------------
 
+### 🔐 Authentication & Security
 
-## 🛠️ Tech Stack
+*   User Signup & Signin with **JWT-based authentication**
+    
+*   Protected routes and secure API access
+    
+*   Centralized auth handling using Axios interceptors
+    
 
-### 🌐 Frontend:
-- React (with React Router)
-- Tailwind CSS (for styling)
+### 💰 Wallet & Payments
 
-### 🖥️ Backend:
-- Node.js & Express.js (REST API)
-- MongoDB (Database)
-- JWT Authentication
-- Axios (for API calls)
+*   View real-time wallet balance
+    
+*   Add funds to wallet
+    
+*   Peer-to-peer money transfers
+    
+*   **Atomic transactions using MongoDB sessions** to prevent partial failures
+    
 
----
+### 🧭 User Experience
 
-## 🏗️ Installation & Setup
+*   Step-based “Send Money” flow with confirmation
+    
+*   Inline validation and guarded actions (e.g. insufficient balance)
+    
+*   Skeleton loaders for perceived performance
+    
+*   Debounced user search to reduce unnecessary API calls
+    
+*   Toast-based success and error feedback
+    
 
-### ⚙️ Prerequisites:
-- Install Node.js and npm on your system.
+### 📊 Activity & Management
+
+*   Transaction history with sent/received indicators
+    
+*   Contacts list for quick transfers
+    
+*   Profile & settings page
+    
+
+🛠️ Tech Stack
+--------------
+
+### 🌐 Frontend
+
+*   **React**
+    
+*   **React Router**
+    
+*   **Tailwind CSS**
+    
+*   **shadcn/ui**
+    
+*   Axios
+    
+
+### 🖥️ Backend
+
+*   **Node.js**
+    
+*   **Express.js**
+    
+*   **MongoDB**
+    
+*   **Mongoose**
+    
+*   JWT Authentication
+    
+*   MongoDB Transactions (startSession) for atomic transfers
+    
+
+🧠 Engineering Highlights
+-------------------------
+
+*   **ACID-compliant money transfers** using MongoDB sessions
+    
+*   **Centralized API layer** with Axios interceptors
+    
+*   **Debounced search & skeleton loading** for optimized UX
+    
+*   **Reusable component architecture** with clear separation of concerns
+    
+*   Focus on the “last 10%” of product polish that turns a demo into a usable app
+    
+
+🏗️ Installation & Local Setup
+------------------------------
+
+### ⚙️ Prerequisites
+
+*   Node.js (v18+ recommended)
+    
+*   npm
+    
 
 ### 🔧 Steps to Run Locally:
 ```sh
@@ -58,24 +132,43 @@ npm start
 
 ---
 
-## 🚀 Deployment  
-https://pyments-transfer-app.vercel.app
-## 🤝 Contributing
-If you'd like to contribute, feel free to submit a Pull Request! 🎉
+### 🌐 Local URLs
 
+*   Frontend: http://localhost:5173
+    
+*   Backend API: http://localhost:3000/api
+    
 
+🚀 Live Demo
+------------
 
-## 📜 License
-This project is MIT Licensed – feel free to use and modify it. 🛠️
+🔗 **Deployed Application:**[https://pyments-transfer-app.vercel.app](https://pyments-transfer-app.vercel.app)
 
+📌 Project Status
+-----------------
 
+This project is **actively evolving** and focused on:
 
-## ⭐ Acknowledgements
-Thanks to Open Source & the amazing community! 🌎✨  
+*   UX polish
+    
+*   Better validation and feedback
+    
+*   Test coverage
+    
+*   Production-level refinements
+    
 
+🤝 Contributing
+---------------
 
+Contributions are welcome!Feel free to open an issue or submit a pull request.
 
-### 📌 Repository Link  
-🔗 [GitHub Repository](https://github.com/SiddarthaRangu/Pyments_Transfer_App)
+📜 License
+----------
 
+This project is licensed under the **MIT License**.
 
+📎 Repository
+-------------
+
+🔗 **GitHub:**[https://github.com/SiddarthaRangu/Pyments\_Transfer\_App](https://github.com/SiddarthaRangu/Pyments_Transfer_App)

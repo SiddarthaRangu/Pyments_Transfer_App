@@ -52,9 +52,12 @@ export const Signin = () => {
                     <InputBox onChange={e => setUsername(e.target.value)} placeholder="john.doe@example.com" label={"Email"} />
                     <InputBox onChange={e => setPassword(e.target.value)} placeholder="123456" label={"Password"} type="password" />
                     <div className="pt-4">
-                        <Button onClick={handleSignin} label={"Sign in"} />
+                        <Button 
+                            onClick={handleSignin} 
+                            label={"Sign in"} 
+                            className="bg-slate-950 hover:bg-slate-800 h-11 text-white shadow-lg shadow-slate-200" 
+                        />
                     </div>
-
                     <BottomWarning label={"Don't have an account?"} buttonText={"Sign up"} to={"/signup"} />
                 </div>
             </div>

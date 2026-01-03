@@ -1,13 +1,31 @@
-import PropTypes from 'prop-types';
+import PropTypes from "prop-types";
+import { Button as ShadcnButton } from "@/components/ui/button";
 
-export function Button({label, onClick}) {
-    return <button onClick={onClick} type="button" 
-        className="w-full text-white bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 transition-all duration-200 ease-in-out active:scale-95">
-        {label}
-    </button>
+export function Button({
+    label,
+    children,
+    onClick,
+    variant = "default",
+    className = "",
+    type = "button"
+}) {
+    return (
+        <ShadcnButton
+            type={type}
+            onClick={onClick}
+            variant={variant}
+            className={`font-semibold transition-all active:scale-95 ${className}`}
+        >
+            {children ?? label}
+        </ShadcnButton>
+    );
 }
 
 Button.propTypes = {
-    label: PropTypes.string.isRequired,
-    onClick: PropTypes.func.isRequired
+    label: PropTypes.string,
+    children: PropTypes.node,
+    onClick: PropTypes.func.isRequired,
+    variant: PropTypes.string,
+    className: PropTypes.string,
+    type: PropTypes.string
 };

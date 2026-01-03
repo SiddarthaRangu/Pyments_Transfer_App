@@ -167,4 +167,30 @@ router.get("/me", authMiddleware, async (req, res) => {
     });
 });
 
+const passwordUpdateBody = zod.object({
+    oldPassword: zod.string(),
+    newPassword: zod.string().min(6)
+});
+
+router.put("/change-password", authMiddleware, async (req, res) => {
+    const { success, data } = passwordUpdateBody.safeParse(req.body);
+    if (!success) {
+        return res.status(400).json({ message: "Invalid inputs" });
+    }
+
+    const user = await User.findById(req.userId);
+    const isMatch = await bcrypt.compare(data.oldPassword, user.password);
+
+    if (!isMatch) {
+        return res.status(401).json({ message: "Current password incorrect" });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(data.newPassword, salt);
+
+    await User.updateOne({ _id: req.userId }, { password: hashedPassword });
+
+    res.json({ message: "Password updated successfully" });
+});
+
 module.exports = router;

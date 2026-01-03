@@ -1,73 +1,79 @@
 import PropTypes from 'prop-types';
 import { useState } from 'react';
-import axios from 'axios';
+import api from '../lib/api';
+import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "./Button";
+import { Input } from "@/components/ui/input";
+import { CheckCircle2, Loader2} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 export const SendMoneyModal = ({ user, onClose, onTransferSuccess }) => {
+    const [step, setStep] = useState(1); // 1: Input, 2: Confirm, 3: Success
     const [amount, setAmount] = useState('');
-
-    if (!user) return null;
+    const [loading, setLoading] = useState(false);
+    const { balance } = useAuth();
 
     const handleTransfer = async () => {
-        if (!amount || amount <= 0) {
-            toast.error("Please enter a valid amount.");
-            return;
-        }
-
-        const loadingToastId = toast.loading('Initiating transfer...');
+        setLoading(true);
         try {
-            await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/account/transfer`,
-            {
-                to: user.id,
-                amount: Number(amount)
-            },
-            {
-                headers: {
-                    Authorization: "Bearer " + localStorage.getItem("token")
-                }
-            });
-            
-            toast.dismiss(loadingToastId);
-            toast.success("Transfer successful!");
+            await api.post(`/account/transfer`, { to: user.id, amount: Number(amount) });
+            setStep(3);
             onTransferSuccess();
-            onClose();
-
-        } catch (error) {
-            toast.dismiss(loadingToastId);
-            toast.error(error.response?.data?.message || "Transfer failed.");
-        }
+            setTimeout(onClose, 2000);
+        } catch (e) {
+            toast.error(e.response?.data?.message || "Error");
+            setStep(1);
+        } finally { setLoading(false); }
     };
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-            <div className="relative w-full max-w-md p-6 bg-white rounded-lg shadow-lg">
-                <button onClick={onClose} className="absolute top-3 right-3 text-gray-500 hover:text-gray-800 text-2xl">&times;</button>
-                <h2 className="text-2xl font-bold text-center mb-4">Send Money</h2>
-                
-                <div className="flex items-center space-x-4 mb-6">
-                    <div className="w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center">
-                        <span className="text-2xl text-white">{user.name[0].toUpperCase()}</span>
-                    </div>
-                    <h3 className="text-xl font-semibold">{user.name}</h3>
-                </div>
-                
-                <div className="space-y-2">
-                    <label htmlFor="amount" className="text-sm font-medium leading-none">Amount (in Rs)</label>
-                    <input
-                        onChange={(e) => setAmount(e.target.value)}
-                        type="number"
-                        id="amount"
-                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                        placeholder="Enter amount"
-                        value={amount}
-                    />
-                </div>
-                
-                <button onClick={handleTransfer} className="mt-4 w-full justify-center rounded-md text-sm font-medium h-10 px-4 py-2 bg-blue-500 text-white hover:bg-blue-600">
-                    Initiate Transfer
-                </button>
-            </div>
-        </div>
+        <Dialog open={!!user} onOpenChange={onClose}>
+            <DialogContent className="sm:max-w-[420px] p-0 overflow-hidden border-none rounded-[2.5rem] shadow-2xl">
+                <AnimatePresence mode="wait">
+                    {step === 1 && (
+                        <motion.div initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -20, opacity: 0 }} className="p-8 space-y-8">
+                            <DialogHeader>
+                                <DialogTitle className="text-2xl font-bold text-center">Enter Amount</DialogTitle>
+                            </DialogHeader>
+                            <div className="flex flex-col items-center gap-2">
+                                <div className="h-20 w-20 rounded-full bg-zinc-100 flex items-center justify-center text-3xl font-bold text-zinc-900">{user?.name[0]}</div>
+                                <p className="font-bold text-lg">{user?.name}</p>
+                            </div>
+                            <div className="relative">
+                                <span className="absolute left-6 top-1/2 -translate-y-1/2 text-3xl font-mono text-zinc-300">₹</span>
+                                <Input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} className="h-24 pl-14 text-5xl font-mono border-none bg-zinc-50 rounded-3xl text-center focus-visible:ring-zinc-950" placeholder="0" />
+                            </div>
+                            <Button label="Continue" disabled={!amount || Number(amount) > balance} onClick={() => setStep(2)} className="w-full h-16 bg-zinc-950 text-white rounded-[1.5rem] text-lg" />
+                        </motion.div>
+                    )}
+
+                    {step === 2 && (
+                        <motion.div initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} className="p-8 space-y-8">
+                            <DialogHeader><DialogTitle className="text-center">Confirm Transfer</DialogTitle></DialogHeader>
+                            <div className="p-6 bg-zinc-50 rounded-[2rem] border border-zinc-100 text-center space-y-2">
+                                <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Total to Send</p>
+                                <p className="text-5xl font-mono font-bold text-zinc-950">₹{amount}</p>
+                                <p className="text-sm text-zinc-500 pt-4">Recipient: <span className="text-zinc-900 font-bold">{user?.name}</span></p>
+                            </div>
+                            <div className="flex gap-3">
+                                <Button variant="outline" label="Back" onClick={() => setStep(1)} className="flex-1 h-14 rounded-2xl" />
+                                <Button label={loading ? <Loader2 className="animate-spin" /> : "Confirm & Send"} onClick={handleTransfer} className="flex-[2] h-14 bg-zinc-950 text-white rounded-2xl font-bold" />
+                            </div>
+                        </motion.div>
+                    )}
+
+                    {step === 3 && (
+                        <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="p-12 text-center space-y-6">
+                            <div className="flex justify-center"><CheckCircle2 className="h-24 w-24 text-emerald-500" strokeWidth={1} /></div>
+                            <h2 className="text-2xl font-bold">Transfer Successful!</h2>
+                            <p className="text-zinc-500">₹{amount} has been sent to {user?.name}.</p>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </DialogContent>
+        </Dialog>
     );
 };
 

@@ -1,107 +1,95 @@
 import { useEffect, useState, useCallback } from "react";
-import axios from "axios";
+import api from "../lib/api";
+import { useAuth } from "../context/AuthContext";
 import { Appbar } from "../components/Appbar";
 import { Balance } from "../components/Balance";
 import { Users } from "../components/Users";
 import { TransactionHistory } from "../components/TransactionHistory";
 import { SendMoneyModal } from '../components/SendMoneyModal';
+import { AddMoneyModal } from '../components/AddMoneyModal';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent } from "@/components/ui/card";
+import { Plus, Wallet } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 export const Dashboard = () => {
-    const [balance, setBalance] = useState(null);
+    const { user, balance, refreshData } = useAuth();
     const [transactions, setTransactions] = useState([]);
-    const [user, setUser] = useState(null);
-    const [error, setError] = useState("");
-    const [activeTab, setActiveTab] = useState('users'); 
     const [selectedUser, setSelectedUser] = useState(null);
+    const [showAddMoney, setShowAddMoney] = useState(false);
 
-    const fetchData = useCallback(async () => {
+    const fetchHistory = useCallback(async () => {
         try {
-            const token = localStorage.getItem("token");
-            const headers = { Authorization: `Bearer ${token}` };
-
-            const [balanceRes, historyRes, userRes] = await Promise.all([
-                axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/v1/account/balance`, { headers }),
-                axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/v1/account/history`, { headers }),
-                axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/v1/user/me`, { headers })
-            ]);
-
-            setBalance(balanceRes.data.balance);
-            setTransactions(historyRes.data.history);
-            setUser(userRes.data.user);
-
-        } catch (err) {
-            console.error("Error fetching dashboard data:", err);
-            setError("⚠️ Failed to fetch data");
-        }
+            const res = await api.get("/account/history");
+            setTransactions(res.data.history);
+        } catch (err) { console.error(err); }
     }, []);
 
     useEffect(() => {
-        fetchData();
-    }, [fetchData]);
-
-    const handleSendMoney = (user) => {
-        setSelectedUser({ id: user._id, name: user.firstName });
-    };
-
-    const handleCloseModal = () => {
-        setSelectedUser(null);
-    };
-
-    const handleTransferSuccess = () => {
-        // Refetch data to update balance and transaction history
-        fetchData();
-    };
+        fetchHistory();
+    }, [fetchHistory, balance]);
 
     return (
-        <div>
-            <Appbar userName={user ? user.firstName : ''} />
-            <div className="m-8">
-                {error ? (
-                    <p className="text-red-500">{error}</p>
-                ) : (
-                    <Balance value={balance !== null ? balance : "Loading..."} />
-                )}
+        <motion.div 
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+            className="min-h-screen bg-[#fafafa] text-slate-950 font-sans"
+        >
+            <Appbar userName={user?.firstName} />
+            
+            <main className="max-w-7xl mx-auto px-6 py-8">
+                {/* Changed columns: sidebar gets 5 spans, content gets 7 */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                    
+                    {/* LEFT SIDEBAR - NOW WIDER */}
+                    <div className="lg:col-span-5 lg:sticky lg:top-24 space-y-4">
+                        <Balance value={balance} />
+                        
+                        <Card className="border-zinc-200/60 shadow-sm rounded-[2rem] overflow-hidden bg-white p-1">
+                            <CardContent className="p-4 space-y-3">
+                                <div className="flex items-center gap-2 px-1">
+                                    <Wallet className="h-3.5 w-3.5 text-zinc-400" />
+                                    <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Wallet Actions</h4>
+                                </div>
+                                <button 
+                                    onClick={() => setShowAddMoney(true)}
+                                    className="flex items-center justify-center gap-3 w-full h-14 bg-zinc-950 text-white rounded-[1.5rem] hover:bg-zinc-800 transition-all font-bold text-base shadow-lg shadow-zinc-200 active:scale-[0.98]"
+                                >
+                                    <Plus className="h-5 w-5" /> Add Money
+                                </button>
+                            </CardContent>
+                        </Card>
+                    </div>
 
-                {/* Tab Navigation */}
-                <div className="border-b border-gray-200 mt-8">
-                    <nav className="-mb-px flex space-x-6" aria-label="Tabs">
-                        <button
-                            onClick={() => setActiveTab('users')}
-                            className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${
-                                activeTab === 'users'
-                                    ? 'border-blue-500 text-blue-600'
-                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                            }`}
-                        >
-                            Users
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('history')}
-                            className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${
-                                activeTab === 'history'
-                                    ? 'border-blue-500 text-blue-600'
-                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                            }`}
-                        >
-                            Transaction History
-                        </button>
-                    </nav>
+                    {/* RIGHT CONTENT - NOW 7 SPANS */}
+                    <div className="lg:col-span-7">
+                        <Tabs defaultValue="users" className="w-full">
+                            <TabsList className="bg-zinc-100 p-1.5 h-14 inline-flex rounded-[1.5rem] border border-zinc-200/50 mb-6">
+                                <TabsTrigger value="users" className="rounded-[1rem] px-8 h-11 data-[state=active]:bg-white data-[state=active]:shadow-md font-bold text-sm">Contacts</TabsTrigger>
+                                <TabsTrigger value="history" className="rounded-[1rem] px-8 h-11 data-[state=active]:bg-white data-[state=active]:shadow-md font-bold text-sm">History</TabsTrigger>
+                            </TabsList>
+                            
+                            <AnimatePresence mode="wait">
+                                <motion.div
+                                    key="content"
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className="bg-white border border-zinc-200/60 rounded-[2.5rem] p-8 shadow-sm min-h-[550px]"
+                                >
+                                    <TabsContent value="users" className="mt-0 outline-none">
+                                        <Users onSendMoney={(u) => setSelectedUser({ id: u._id, name: u.firstName })} />
+                                    </TabsContent>
+                                    <TabsContent value="history" className="mt-0 outline-none">
+                                        <TransactionHistory transactions={transactions} />
+                                    </TabsContent>
+                                </motion.div>
+                            </AnimatePresence>
+                        </Tabs>
+                    </div>
                 </div>
+            </main>
 
-                {/* Conditional Rendering based on activeTab */}
-                <div className="mt-6">
-                    {activeTab === 'users' && <Users onSendMoney={handleSendMoney} />}
-                    {activeTab === 'history' && <TransactionHistory transactions={transactions} />}
-                </div>
-            </div>
-            {selectedUser && (
-                <SendMoneyModal 
-                    user={selectedUser}
-                    onClose={handleCloseModal}
-                    onTransferSuccess={handleTransferSuccess}
-                />
-            )}
-        </div>
-        
+            <AddMoneyModal isOpen={showAddMoney} onClose={() => setShowAddMoney(false)} onSuccess={refreshData} />
+            {selectedUser && <SendMoneyModal user={selectedUser} onClose={() => setSelectedUser(null)} onTransferSuccess={refreshData} />}
+        </motion.div>
     );
 };
