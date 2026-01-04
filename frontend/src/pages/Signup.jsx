@@ -1,14 +1,14 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../lib/api";
 import toast from "react-hot-toast";
-
 import { BottomWarning } from "../components/BottomWarning";
 import { Button } from "../components/Button";
-import { Heading } from "../components/Heading";
-import { InputBox } from "../components/InputBox";
 import { SubHeading } from "../components/SubHeading";
+import { InputBox } from "../components/InputBox";
+import { PasswordInput } from "../components/PasswordInput";
 import { useAuth } from "../context/AuthContext";
+import { motion } from "framer-motion";
 
 export const Signup = () => {
     const [firstName, setFirstName] = useState("");
@@ -16,64 +16,54 @@ export const Signup = () => {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const navigate = useNavigate();
-    const {refreshData} = useAuth();
+    const { refreshData } = useAuth();
 
     const handleSignup = async () => {
+        const loadingToastId = toast.loading('Creating account...');
         try {
-            // Show a loading toast
-            const loadingToastId = toast.loading('Creating your account...');
-
-            const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/user/signup`, {
-                username,
-                firstName,
-                lastName,
-                password
-            });
-
-            // Dismiss the loading toast
+            const response = await api.post("/user/signup", { username, firstName, lastName, password });
             toast.dismiss(loadingToastId);
-
-            if (response.status === 200) {
-                // Show a success toast
-                toast.success("Account created successfully! Redirecting to sign in...");
-
-                 // Redirect after a short delay
-                localStorage.setItem("token", response.data.token);
-
-                await refreshData(); // Refresh auth context data
-                
-                navigate("/dashboard");
-            }
+            toast.success("Account Ready!");
+            localStorage.setItem("token", response.data.token);
+            await refreshData();
+            navigate("/dashboard");
         } catch (err) {
-            // Dismiss loading toast if it exists
-            toast.dismiss();
-            // Show an error toast
-            toast.error(err.response?.data?.message || "Signup failed! Please check your inputs.");
+            toast.dismiss(loadingToastId);
+            toast.error(err.response?.data?.message || "Signup failed");
         }
     };
 
     return (
-        <div className="bg-slate-300 h-screen flex justify-center">
-            <div className="flex flex-col justify-center">
-                <div className="rounded-lg bg-white w-80 text-center p-2 h-max px-4">
-                    <Heading label={"Sign up"} />
-                    <SubHeading label={"Enter your information to create an account"} />
-                    <InputBox onChange={e => setFirstName(e.target.value)} placeholder="John" label={"First Name"} />
-                    <InputBox onChange={e => setLastName(e.target.value)} placeholder="Doe" label={"Last Name"} />
-                    <InputBox onChange={e => setUsername(e.target.value)} placeholder="john.doe@example.com" label={"Email"} />
-                    <InputBox onChange={e => setPassword(e.target.value)} placeholder="123456" label={"Password"} type="password" />
+        <div className="min-h-screen bg-zinc-950 flex items-center justify-center px-6 py-10 overflow-y-auto no-scrollbar">
+            <motion.div 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-white rounded-[2rem] w-full max-w-[380px] p-8 shadow-2xl space-y-6"
+            >
+                <div className="text-center space-y-1">
+                    <h1 className="text-3xl font-black tracking-tighter text-zinc-950">SwiftPay</h1>
+                    <SubHeading label={"Join SwiftPay today"} />
+                </div>
 
-                   <div className="pt-4">
+                <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-3">
+                        <InputBox onChange={e => setFirstName(e.target.value)} placeholder="John" label={"First Name"} />
+                        <InputBox onChange={e => setLastName(e.target.value)} placeholder="Doe" label={"Last Name"} />
+                    </div>
+                    <InputBox onChange={e => setUsername(e.target.value)} placeholder="john@example.com" label={"Email"} />
+                    <PasswordInput onChange={e => setPassword(e.target.value)} placeholder="Min. 6 chars" label={"Password"} />
+
+                    <div className="pt-2">
                         <Button 
                             onClick={handleSignup} 
-                            label={"Sign up"} 
-                            className="bg-slate-950 hover:bg-slate-800 h-11 text-white shadow-lg shadow-slate-200" 
+                            label="Create Account" 
+                            className="w-full h-12 shadow-lg shadow-zinc-200" 
                         />
                     </div>
-
-                    <BottomWarning label={"Already have an account?"} buttonText={"Sign in"} to={"/signin"} />
                 </div>
-            </div>
+
+                <BottomWarning label={"Have an account?"} buttonText={"Sign in"} to={"/signin"} />
+            </motion.div>
         </div>
     );
 };

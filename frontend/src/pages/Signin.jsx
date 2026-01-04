@@ -1,69 +1,71 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../lib/api";
 import toast from "react-hot-toast";
-
 import { BottomWarning } from "../components/BottomWarning";
 import { Button } from "../components/Button";
-import { Heading } from "../components/Heading";
-import { InputBox } from "../components/InputBox";
 import { SubHeading } from "../components/SubHeading";
+import { InputBox } from "../components/InputBox";
+import { PasswordInput } from "../components/PasswordInput";
 import { useAuth } from "../context/AuthContext";
+import { motion } from "framer-motion";
 
 export const Signin = () => {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const navigate = useNavigate();
-    const {refreshData} = useAuth();
+    const { refreshData } = useAuth();
 
     const handleSignin = async () => {
-        let loadingToastId; // Declare toast ID variable
+        const loadingToastId = toast.loading('Authenticating...');
         try {
-            // 1. Show a loading toast
-            loadingToastId = toast.loading('Signing in...');
-
-            const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/v1/user/signin`, {
-                username,
-                password
-            });
-            
-            // 2. Dismiss the loading toast on success
+            const response = await api.post("/user/signin", { username, password });
             toast.dismiss(loadingToastId);
-
-            if (response.status === 200) {
-                // 3. Show a success toast
-                toast.success("Signed in successfully!");
-
-                localStorage.setItem("token", response.data.token);
-                await refreshData(); // Refresh auth context data
-                navigate("/dashboard"); // Redirect to dashboard on success
-            }
+            toast.success("Welcome back!");
+            localStorage.setItem("token", response.data.token);
+            await refreshData();
+            navigate("/dashboard");
         } catch (err) {
-            // 4. Dismiss loading toast and show an error toast on failure
             toast.dismiss(loadingToastId);
-            toast.error(err.response?.data?.message || "Invalid credentials. Please try again.");
+            toast.error(err.response?.data?.message || "Invalid credentials");
         }
     };
 
     return (
-        <div className="bg-slate-300 h-screen flex justify-center">
-            <div className="flex flex-col justify-center">
-                <div className="rounded-lg bg-white w-80 text-center p-2 h-max px-4">
-                    <Heading label={"Sign in"} />
-                    <SubHeading label={"Enter your credentials to access your account"} />
+        <div className="min-h-screen bg-zinc-950 flex items-center justify-center px-6 overflow-y-auto no-scrollbar py-10">
+            <motion.div 
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="bg-white rounded-[2rem] w-full max-w-[380px] p-8 shadow-2xl space-y-6"
+            >
+                <div className="text-center space-y-1">
+                    <h1 className="text-3xl font-black tracking-tighter text-zinc-950">SwiftPay</h1>
+                    <SubHeading label={"Log in to your account"} />
+                </div>
+                
+                <div className="space-y-4">
+                    <InputBox 
+                        onChange={e => setUsername(e.target.value)} 
+                        placeholder="john@example.com" 
+                        label={"Email"} 
+                    />
+                    <PasswordInput 
+                        onChange={e => setPassword(e.target.value)} 
+                        placeholder="••••••••" 
+                        label={"Password"} 
+                    />
                     
-                    <InputBox onChange={e => setUsername(e.target.value)} placeholder="john.doe@example.com" label={"Email"} />
-                    <InputBox onChange={e => setPassword(e.target.value)} placeholder="123456" label={"Password"} type="password" />
-                    <div className="pt-4">
+                    <div className="pt-2">
                         <Button 
                             onClick={handleSignin} 
-                            label={"Sign in"} 
-                            className="bg-slate-950 hover:bg-slate-800 h-11 text-white shadow-lg shadow-slate-200" 
+                            label="Sign In" 
+                            className="w-full h-12 shadow-lg shadow-zinc-200" 
                         />
                     </div>
-                    <BottomWarning label={"Don't have an account?"} buttonText={"Sign up"} to={"/signup"} />
                 </div>
-            </div>
+
+                <BottomWarning label={"New here?"} buttonText={"Create Account"} to={"/signup"} />
+            </motion.div>
         </div>
     );
 };
