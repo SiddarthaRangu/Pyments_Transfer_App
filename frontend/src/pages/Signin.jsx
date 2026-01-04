@@ -8,11 +8,13 @@ import { Button } from "../components/Button";
 import { Heading } from "../components/Heading";
 import { InputBox } from "../components/InputBox";
 import { SubHeading } from "../components/SubHeading";
+import { useAuth } from "../context/AuthContext";
 
 export const Signin = () => {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const navigate = useNavigate();
+    const {refreshData} = useAuth();
 
     const handleSignin = async () => {
         let loadingToastId; // Declare toast ID variable
@@ -33,6 +35,7 @@ export const Signin = () => {
                 toast.success("Signed in successfully!");
 
                 localStorage.setItem("token", response.data.token);
+                await refreshData(); // Refresh auth context data
                 navigate("/dashboard"); // Redirect to dashboard on success
             }
         } catch (err) {

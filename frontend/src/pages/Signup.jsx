@@ -8,6 +8,7 @@ import { Button } from "../components/Button";
 import { Heading } from "../components/Heading";
 import { InputBox } from "../components/InputBox";
 import { SubHeading } from "../components/SubHeading";
+import { useAuth } from "../context/AuthContext";
 
 export const Signup = () => {
     const [firstName, setFirstName] = useState("");
@@ -15,6 +16,7 @@ export const Signup = () => {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const navigate = useNavigate();
+    const {refreshData} = useAuth();
 
     const handleSignup = async () => {
         try {
@@ -34,11 +36,13 @@ export const Signup = () => {
             if (response.status === 200) {
                 // Show a success toast
                 toast.success("Account created successfully! Redirecting to sign in...");
+
+                 // Redirect after a short delay
+                localStorage.setItem("token", response.data.token);
+
+                await refreshData(); // Refresh auth context data
                 
-                // Redirect after a short delay
-                setTimeout(() => {
-                    navigate("/signin");
-                }, 2000); // 2-second delay
+                navigate("/dashboard");
             }
         } catch (err) {
             // Dismiss loading toast if it exists
