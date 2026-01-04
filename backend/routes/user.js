@@ -49,7 +49,7 @@ router.post("/signup", async (req, res) => {
 
     const token = jwt.sign({
         userId
-    }, JWT_SECRET);
+    }, JWT_SECRET, { expiresIn: "7d" });
 
     res.json({
         message: "User created successfully",
@@ -84,7 +84,7 @@ router.post("/signin", async (req, res) => {
                  if (isMatch) {
             const token = jwt.sign({
                 userId: user._id
-            }, JWT_SECRET);
+            }, JWT_SECRET, { expiresIn: "7d" });
       
             // Send the success response
             return res.json({
@@ -154,7 +154,7 @@ router.get("/me", authMiddleware, async (req, res) => {
     const user = await User.findOne({ _id: req.userId }).select("-password");
 
     if (!user) {
-        return res.status(404).json({ message: "User not found" });
+        return res.status(401).json({ message: "`Unauthorized" });
     }
 
     res.json({
